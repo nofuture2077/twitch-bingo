@@ -43,14 +43,13 @@
             })
             .then(response => response.json())
             .then(data => {
-                let username = data.data[0].username;
-                console.log("User: " + data.data[0].username)
+                let username = data.data[0].login;
                 renderGame(username)
-            })
+            });
     }
     
     var queryData = localStorage.getItem('g') || 'N4XyA===';
-    var gamedata = JSON.parse(LZString.decompressFromBase64(queryData));
+    var gamedata = JSON.parse(LZString.decompressFromBase64(queryData)) || {};
     let GAMEKEY = gamedata.channel + "#" + gamedata.key;
 
     function toogleCellHandle(caller, gameState, index) {
