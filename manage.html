@@ -85,7 +85,7 @@
 
     function startGame() {
         let gameData = buildGameData();
-        let link = window.location.pathname.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+        let link = window.location.href.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
         gameData.checked = {};
 
         appState.state = "game";

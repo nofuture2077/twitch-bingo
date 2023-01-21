@@ -8,7 +8,7 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
-    if (!document.location.hash.includes('access_token') && 1 === 0) {
+    if (!document.location.hash.includes('access_token')) {
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
         let claims = JSON.stringify({userinfo: {preferred_username: null}});
@@ -18,11 +18,15 @@
         let responseType = encodeURIComponent('token id_token');
         let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
         window.location.href = url;
+    } else {
+        setTimeout(() => {
+            renderGame("testplayer123")
+        }, 500)
     }
+    let g = getQueryVariable('g');
 
-    var gamedata = JSON.parse(LZString.decompressFromBase64(getQueryVariable('g')))
+    var gamedata = g && JSON.parse(LZString.decompressFromBase64(getQueryVariable('g')))
     let GAMEKEY = gamedata.channel + "#" + gamedata.key;
-    let USERNAME = "Twitch Username 2713";
 
     function getQueryVariable(variable) {
         var query = window.location.search.substring(1);
@@ -47,7 +51,7 @@
         let gameStateData = localStorage.getItem(GAMEKEY);
         let gameState = gameStateData ? JSON.parse(gameStateData) : {
             key: GAMEKEY,
-            user: USERNAME,
+            user: username,
             free: gamedata.free,
             userItems: randomSample(gamedata.items, 25, GAMEKEY + "#" + username),
             checked: {}
@@ -73,8 +77,5 @@
         <span>Player: <strong id="player"></strong></span>
         <span>Game: <strong id="key"></strong></span>
     </p>
-    <script>
-        renderGame("testplayer123")
-    </script>
 </body>
 </html>
