@@ -85,7 +85,6 @@
 
     function startGame() {
         let gameData = buildGameData();
-        let link = window.location.href.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
         gameData.checked = {};
 
         appState.state = "game";
@@ -110,7 +109,7 @@
 
     function buildLink() {
         let gameData = buildGameData();
-        return window.location.pathname.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+        return window.location.href.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
     }
 
     function shareGame() {
