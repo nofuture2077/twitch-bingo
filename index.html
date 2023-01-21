@@ -8,8 +8,7 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
-    function getQueryVariable(variable) {
-        var query = window.location.search.substring(1);
+    function getQueryVariable(query, variable) {
         var vars = query.split('&');
         for (var i = 0; i < vars.length; i++) {
             var pair = vars[i].split('=');
@@ -21,7 +20,8 @@
     }
 
     if (!document.location.hash.includes('access_token')) {
-        let queryData = getQueryVariable('g');
+        var query = window.location.search.substring(1);
+        let queryData = getQueryVariable(query, 'g');
         localStorage.setItem('g', queryData);
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
@@ -33,9 +33,20 @@
         let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
         window.location.href = url;
     } else {
-        setTimeout(() => {
-            renderGame("testplayer123")
-        }, 500)
+        let queryhash = window.location.hash.substr(1);
+        let access_token = getQueryVariable(queryhash, "access_token");
+        fetch('https://api.twitch.tv/helix/users', {
+            headers: {
+                'Client-ID': 'uc2h7uynj3tnxh26ozo9r6uxwvlri4',
+                'Authorization': 'Bearer ' + access_token
+            }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let username = data.data[0].username;
+                console.log("User: " + data.data[0].username)
+                renderGame(username)
+            })
     }
     
     var queryData = localStorage.getItem('g') || 'N4XyA===';

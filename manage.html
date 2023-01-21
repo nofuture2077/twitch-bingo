@@ -234,13 +234,13 @@
     </div>
     <script>
         key = appState.key || self.crypto.randomUUID();
-        let link = buildLink();
         document.getElementById("keyInput").value = key;
         document.getElementById("botInput").value = appState.bot;
         document.getElementById("channelInput").value = appState.channel;
         document.getElementById("titleInput").value = appState.title;
         document.getElementById("optionInput").value = appState.options;
         document.getElementById("centerInput").checked = appState.free;
+        let link = buildLink();
         document.getElementById("linkInput").value = link;
         appState.key = key;
         saveAppState(appState);
