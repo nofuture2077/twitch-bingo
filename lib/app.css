@@ -1,0 +1,208 @@
+body {
+  background-color: #f6f7fa;
+  font-family: Avenir ,sans-serif;
+  padding: 2px;
+  padding-bottom: 10rem;
+}
+
+.maxw-95 {
+  max-width: 95vmin;
+}
+
+.instructions ul, .instructions p {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.instructions li {
+  padding-bottom: .5rem;
+}
+
+header {
+  margin: 0 0 1rem 0;
+  min-height: 4rem;
+  font-weight: 800;
+  max-width: 95vmin;
+  border-bottom: 5px solid black;
+}
+
+header, main, aside {
+ margin: 2vmin;
+}
+
+.bb-3 {
+  border-bottom: 3px solid black;
+}
+
+.bb-5 {
+  border-bottom: 5px solid black;
+}
+
+*[role='grid'] {
+  border-collapse: collapse;
+  width: 100%;
+  padding: 2rem;
+  outline: 4px solid #dddbda;
+}
+
+*[role='gridcell'] {
+  outline: 2px solid #dddbda;
+  position: relative;
+}
+
+*[role='gridcell']:before {
+  content: '';
+  display: block;
+  padding-top: 100%;
+}
+
+.cell-contents {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.cell-toggle {
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  overflow: auto;
+
+  background: white;
+  border: .5rem solid transparent;
+
+  font-weight: 500;
+
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.cell-toggle[aria-pressed='true'] {
+  background: #16325c;
+  color: white;
+  font-style: italic;
+}
+
+.cell-toggle[aria-disabled='true'] {
+  cursor: default;
+}
+
+.cell-toggle:focus {
+  outline: none;
+  border: .5rem solid #1589ee;
+}
+
+@media only screen and (max-device-width : 480px) {
+  .cell-toggle {
+    font-size: .7rem;
+  }
+}
+
+.blue-button {
+  background-color: #1460AA;
+}
+
+.refresh {
+  margin: 1rem auto;
+}
+
+.app {
+  text-align: center;
+}
+
+ol {
+  margin: 0 auto;
+  text-align: left;
+}
+
+svg {
+  fill: white;
+  width: 2rem;
+  height: 2rem;
+}
+
+.success {
+  bottom: 0;
+  right: 0;
+  left: 1px; /* midnight hack */
+  background-color: #EAEDF5;
+  outline: 4px solid #dddbda;
+}
+
+.w3t {
+  display: inline-block;
+  width: 30%;
+}
+
+.center {
+  text-align: center;
+}
+.hidden {
+  display: none;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+.items-end {
+    align-items: flex-end;
+}
+
+.tc {
+  text-align: center;
+}
+
+.mb2 {
+  margin-bottom: 0.5rem;
+}
+.pa3 {
+  padding: 1rem;
+}
+.bg-white {
+  background-color: #fff;
+}
+.bg-black {
+  background-color: #000;
+}
+.black {
+  color: #000;
+}
+.white {
+  color: #fff;
+}
+.fw8 {
+  font-weight: 800;
+}
+.bw1 {
+  border-width: 0.125rem;
+}
+.b--black {
+  border-color: #000;
+}
+
+.check-option {
+  width: 500px;
+  padding: 2px;
+  margin: 2px;
+  overflow: auto;
+
+  background: white;
+  border: .5rem solid transparent;
+
+  font-weight: 500;
+
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.check-option[aria-pressed='true'] {
+  background: #16325c;
+  color: white;
+  font-style: italic;
+}

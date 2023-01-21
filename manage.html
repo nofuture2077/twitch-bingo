@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="lib/app.css" rel="stylesheet"/>
+    <script src="lib/twitch.js"></script>
+    <script src="lib/lz-string.js"></script>
+    <script src="lib/seedrandom.min.js"></script>
+    <script src="lib/shuffle-seed.min.js"></script>
+    <script src="lib/bingoboard.js"></script>
+<script>
+    let appStateData = localStorage.getItem("appstate");
+    let appState = appStateData ? JSON.parse(appStateData) :  {
+        "channel": "",
+        "title": "",
+        "bot": "",
+        "key": "",
+        "options": "",
+        "checked": {},
+        "state": "manage"
+    };
+
+    var pad_array = function(arr, len, fill) {
+        return arr.concat(Array(len).fill(fill)).slice(0,len);
+    }
+
+    function buildGameData() {
+        var channel = document.getElementById("channelInput").value; 
+        var key = document.getElementById("keyInput").value; 
+        var title = document.getElementById("titleInput").value; 
+        var free = document.getElementById("centerInput").checked; 
+        var options = document.getElementById("optionInput").value;            
+        var lines = pad_array(options.replace(/\r\n/g,"\n").split("\n").map(s => s.trim()).filter(s => s), 25, "Empty");
+
+        return {
+            channel: channel,
+            title: title,
+            key: key,
+            free: free,
+            items: lines
+        };
+    }
+
+    function showPreview() {
+        let gameData = buildGameData();
+        gameData.checked = {};
+        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + "testuser123");
+
+        createTable("gameContainer", gameData)
+    }
+
+    function checkOption(item, gameData) {
+        let index = item.getAttribute("index");
+        let newValue = !gameData.checked[index]
+        gameData.checked[index] = newValue;
+        appState.checked[index] = newValue;
+        item.setAttribute("aria-pressed", newValue);
+        saveAppState(appState);
+
+        if (appState.checkPlayer) {
+            checkPlayer();
+        }
+    }
+
+    function switchToGameMode(gameData) {
+        document.getElementById("prepareGameContainer").style.display = "none";
+        document.getElementById("playGameContainer").style.display = "block";
+
+        let optionBoard = document.getElementById("optionBoard");
+
+        for (i = 0; i < gameData.items.length;i++) {
+            let li = document.createElement("li");
+            li.innerHTML = gameData.items[i];
+            li.className = 'check-option'
+            li.setAttribute("index", i);
+            li.onclick = () => checkOption(li, gameData)
+            li.setAttribute("aria-pressed", appState.checked[i])
+            optionBoard.appendChild(li);
+        }
+    }
+
+    function switchToPrepareMode() {
+        document.getElementById("prepareGameContainer").style.display = "block";
+        document.getElementById("playGameContainer").style.display = "none";
+    }
+
+    function startGame() {
+        let gameData = buildGameData();
+        let link = window.location.pathname.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+        gameData.checked = {};
+
+        appState.state = "game";
+        saveAppState(appState);
+
+        switchToGameMode(gameData);
+    }
+
+    function stopGame() {
+        appState.state = "manage";
+        appState.key = self.crypto.randomUUID();
+        appState.checked = {};
+        appState.checkPlayer = false;
+        document.getElementById("keyInput").value = appState.key;
+        saveAppState(appState);
+
+        document.getElementById("checkPlayerInput").value = ''
+        document.getElementById("checkPlayerContainer").innerHTML = ''
+        document.getElementById("optionBoard").innerHTML = ''
+        switchToPrepareMode();
+    }
+
+    function buildLink() {
+        let gameData = buildGameData();
+        return window.location.pathname.replace("manage", "play") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+    }
+
+    function shareGame() {
+        let link = buildLink();
+
+        console.log(link);
+    }
+
+    function saveAppState(appState) {
+        localStorage.setItem("appstate", JSON.stringify(appState));
+    }
+
+    function save(key, apKey) {
+        var value = document.getElementById(key).value;
+        appState[apKey] = value;
+        saveAppState(appState);
+    }
+
+    function saveChecked(key, apKey) {
+        var value = document.getElementById(key).checked;
+        appState[apKey] = value;
+        saveAppState(appState);
+    }
+
+    function isBingo(userIndex, free) {
+        let result = userIndex.map((x, i) => appState.checked[x]);
+
+        if (free) {
+            result[12] = true;
+        }
+
+        return (result[0] && result[1] && result[2] && result[3] && result[4]) ||
+        (result[5] && result[6] && result[7] && result[8] && result[9]) ||
+        (result[10] && result[11] && result[12] && result[13] && result[14]) ||
+        (result[15] && result[16] && result[17] && result[18] && result[19]) ||
+        (result[20] && result[12] && result[22] && result[23] && result[24]) ||
+        (result[0] && result[5] && result[10] && result[15] && result[20]) ||
+        (result[1] && result[6] && result[11] && result[16] && result[21]) ||
+        (result[2] && result[7] && result[12] && result[17] && result[22]) ||
+        (result[3] && result[8] && result[13] && result[18] && result[23]) ||
+        (result[4] && result[9] && result[14] && result[19] && result[24]) ||
+        (result[0] && result[6] && result[12] && result[18] && result[24]) ||
+        (result[4] && result[8] && result[12] && result[16] && result[20]);
+    }
+
+    function checkPlayer() {
+        let playerName = document.getElementById("checkPlayerInput").value
+
+        let gameData = buildGameData();
+        
+        appState.checkPlayer = true;
+        let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
+
+        let bingo = isBingo(userIndex, gameData.free);
+        if (bingo) {
+            document.getElementById("bingo").innerHTML = 'BINGO';
+        } else {
+            document.getElementById("bingo").innerHTML = '';
+        }
+
+        createTable("checkPlayerContainer", gameData)
+    }
+
+</script>
+</head>
+<body>
+    <header class="flex justify-between items-end bb-5 pv-1">
+        <h1 class="ma2 f1-ns f2-m f3">ScamBingo 2000</h1>
+    </header>
+    <div id="prepareGameContainer">
+        <div class="flex justify-between">
+            <div>
+                <label for="channelInput">Channel:</label><br/>
+                <input name="channelInput" id="channelInput" onblur="save('channelInput', 'channel')"/>
+                <br><br>
+                <label for="titleInput">Game Titel:</label><br/>
+                <input name="titleInput" id="titleInput" value="A nice Game of Bingo" onblur="save('titleInput', 'title')"/>
+                <br><br>
+                <label for="keyInput">Game Key:</label><br/>
+                <input name="keyInput" id="keyInput" disabled="true"/>
+                <br><br>
+                <label for="botInput">Bot Auth:</label><br/>
+                <input name="botInput" id="botInput" onblur="save('botInput', 'bot')"/>
+                <br><br>
+                <label for="centerInput">Free Center</label>
+                <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')">  
+                <br/><br/>
+            </div>
+            <div>
+                <label for="optionInput">Bingo Options. You should provide at least 25</label><br/>
+                <textarea name="optionInput" id="optionInput" rows="30" cols="50" onblur="save('optionInput', 'options')"></textarea>
+            </div>
+        </div>
+
+        <button onClick="showPreview()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Preview</button>
+        <button onClick="startGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Start</button>
+        <br><br>
+        <div id="gameContainer"></div>
+    </div>
+    <div id="playGameContainer">
+        <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
+        <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
+        <br><br>
+        <ul id="optionBoard"></ul>
+        <br><br>
+        <label for="linkInput">Link to the Game</label><br/>
+        <input name="linkInput" id="linkInput" size="80"/>
+        <br><br>
+        <div class="flex justify-between items-end">
+            <div>
+                <label for="checkPlayerInput">Check for Player Bingo</label><br/>
+                <input name="checkPlayerInput" id="checkPlayerInput"/>
+                <button onClick="checkPlayer()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Check</button>
+            </div>
+            <div>
+                <h1 id="bingo"></h1>
+            </div>
+        </div>
+        <div id="checkPlayerContainer"></div>
+    </div>
+    <script>
+        key = appState.key || self.crypto.randomUUID();
+        let link = buildLink();
+        document.getElementById("keyInput").value = key;
+        document.getElementById("botInput").value = appState.bot;
+        document.getElementById("channelInput").value = appState.channel;
+        document.getElementById("titleInput").value = appState.title;
+        document.getElementById("optionInput").value = appState.options;
+        document.getElementById("centerInput").checked = appState.free;
+        document.getElementById("linkInput").value = link;
+        appState.key = key;
+        saveAppState(appState);
+
+        if (appState.state === "game") {
+            let gameData = buildGameData();
+            gameData.checked = appState.checked;
+            switchToGameMode(gameData);
+        } else {
+            switchToPrepareMode();
+        }
+    </script>
+</body>
+</html>

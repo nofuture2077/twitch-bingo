@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="lib/app.css" rel="stylesheet"/>
+    <script src="lib/twitch.js"></script>
+    <script src="lib/lz-string.js"></script>
+    <script src="lib/seedrandom.min.js"></script>
+    <script src="lib/shuffle-seed.min.js"></script>
+    <script src="lib/bingoboard.js"></script>
+<script>
+    if (!document.location.hash.includes('access_token') && 1 === 0) {
+        let state = self.crypto.randomUUID();
+        localStorage.setItem('state', state);
+        let claims = JSON.stringify({userinfo: {preferred_username: null}});
+        let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
+        let scope = encodeURIComponent('openid');
+        let redirectUrl = window.location.href;
+        let responseType = encodeURIComponent('token id_token');
+        let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
+        window.location.href = url;
+    }
+
+    var gamedata = JSON.parse(LZString.decompressFromBase64(getQueryVariable('g')))
+    let GAMEKEY = gamedata.channel + "#" + gamedata.key;
+    let USERNAME = "Twitch Username 2713";
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+        console.log('Query variable %s not found', variable);
+    }
+
+    function toogleCellHandle(caller, gameState, index) {
+        let newState = !gameState.checked[index];
+        gameState.checked[index] = newState;
+        caller.setAttribute("aria-pressed", newState);
+        localStorage.setItem(GAMEKEY, JSON.stringify(gameState));
+    }
+
+    function renderGame(username) {
+        let gameStateData = localStorage.getItem(GAMEKEY);
+        let gameState = gameStateData ? JSON.parse(gameStateData) : {
+            key: GAMEKEY,
+            user: USERNAME,
+            free: gamedata.free,
+            userItems: randomSample(gamedata.items, 25, GAMEKEY + "#" + username),
+            checked: {}
+        };
+
+        createTable("gameContainer", gameState, (t, index) => {
+            return toogleCellHandle(t, gameState, index)
+        });
+
+        document.getElementById("channel").innerHTML = gamedata.channel;
+        document.getElementById("key").innerHTML = gamedata.key;
+        document.getElementById("player").innerHTML = username;
+    }
+</script>
+</head>
+<body>
+    <header class="flex justify-between items-end bb-5 pv-1">
+        <h1 class="ma2 f1-ns f2-m f3">ScamBingo 2000</h1>
+    </header>
+    <div id="gameContainer"></div>
+    <p class="ph1 pb3 flex justify-between items-end">
+        <span>Channel: <strong id="channel"></strong></span>
+        <span>Player: <strong id="player"></strong></span>
+        <span>Game: <strong id="key"></strong></span>
+    </p>
+    <script>
+        renderGame("testplayer123")
+    </script>
+</body>
+</html>
