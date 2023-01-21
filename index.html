@@ -28,7 +28,7 @@
         let claims = JSON.stringify({userinfo: {preferred_username: null}});
         let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
         let scope = encodeURIComponent('openid');
-        let redirectUrl = window.location.href;
+        let redirectUrl = window.location.origin + window.location.pathname.replace("index.html", "");
         let responseType = encodeURIComponent('token id_token');
         let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
         window.location.href = url;

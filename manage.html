@@ -109,7 +109,7 @@
 
     function buildLink() {
         let gameData = buildGameData();
-        return window.location.href.replace("manage.html", "") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+        return window.location.origin + window.location.pathname.replace("manage.html", "") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
     }
 
     function shareGame() {
