@@ -8,7 +8,21 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            if (decodeURIComponent(pair[0]) == variable) {
+                return decodeURIComponent(pair[1]);
+            }
+        }
+        console.log('Query variable %s not found', variable);
+    }
+
     if (!document.location.hash.includes('access_token')) {
+        let queryData = getQueryVariable('g');
+        localStorage.setItem('g', queryData);
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
         let claims = JSON.stringify({userinfo: {preferred_username: null}});
@@ -23,22 +37,10 @@
             renderGame("testplayer123")
         }, 500)
     }
-    let g = getQueryVariable('g');
-
-    var gamedata = g && JSON.parse(LZString.decompressFromBase64(getQueryVariable('g')))
+    
+    var queryData = localStorage.getItem('g');
+    var gamedata = g && JSON.parse(LZString.decompressFromBase64(queryData));
     let GAMEKEY = gamedata.channel + "#" + gamedata.key;
-
-    function getQueryVariable(variable) {
-        var query = window.location.search.substring(1);
-        var vars = query.split('&');
-        for (var i = 0; i < vars.length; i++) {
-            var pair = vars[i].split('=');
-            if (decodeURIComponent(pair[0]) == variable) {
-                return decodeURIComponent(pair[1]);
-            }
-        }
-        console.log('Query variable %s not found', variable);
-    }
 
     function toogleCellHandle(caller, gameState, index) {
         let newState = !gameState.checked[index];
