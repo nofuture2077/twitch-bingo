@@ -112,6 +112,7 @@
 
         let link = buildLink();
         document.getElementById("linkInput").value = link;
+        document.getElementById("channelInput2").value = appState.channel;
 
         let optionBoard = document.getElementById("optionBoard");
 
@@ -339,11 +340,14 @@
     </div>
     <div id="playGameContainer">
         <div id="gameControl">
+            <label for="linkInput">Link to the Game</label><br/>
+            <input name="linkInput" id="linkInput" readonly size="80"/>
+            <br><br>
+            <label for="channelInput2">Channel</label><br/>
+            <input name="channelInput2" id="channelInput2" readonly value="foo"/>
+            <br><br>
             <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
             <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
-            <br><br>
-            <label for="linkInput">Link to the Game</label><br/>
-            <input name="linkInput" id="linkInput" size="80"/>
             <br><br>
         </div>
         <div class="flex justify-between">
@@ -355,7 +359,7 @@
                 <br><br>
                 <div class="flex justify-between items-end">
                     <div>
-                        <label for="checkPlayerInput">Check for Player Bingo</label><br/>
+                        <label for="checkPlayerInput">Playername</label><br/>
                         <input name="checkPlayerInput" id="checkPlayerInput"/>
                         <button onClick="checkPlayer()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Check</button>
                         <button onClick="announceWinner()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Winner</button>
@@ -383,6 +387,7 @@
 
         let link = buildLink();
         document.getElementById("linkInput").value = link;
+        document.getElementById("channelInput2").value = appState.channel;
 
         if (appState.state === "game") {
             let gameData = buildGameData();
