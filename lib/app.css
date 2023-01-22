@@ -206,3 +206,21 @@ svg {
   color: white;
   font-style: italic;
 }
+
+#twitchChat {
+  margin-right: 100px;
+  width: 400px;
+}
+
+.no-bingo-msg {
+  color: #666
+}
+
+.bingo-msg {
+  background-color: #79ff6d;
+}
+
+.confirmed-bingo-msg {
+  background-color: #096700;
+  color: #fff
+}

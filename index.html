@@ -49,7 +49,7 @@
     }
     
     var queryData = localStorage.getItem('g') || 'N4XyA===';
-    var gamedata = JSON.parse(LZString.decompressFromBase64(queryData)) || {};
+    var gamedata = JSON.parse(LZString.decompressFromEncodedURIComponent(queryData)) || {};
     let GAMEKEY = gamedata.channel + "#" + gamedata.key;
 
     function toogleCellHandle(caller, gameState, index) {

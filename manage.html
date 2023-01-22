@@ -23,7 +23,7 @@
     const { Chat } = window.TwitchJs;
 
     let botParts = appState.bot.split("#");
-    console.log(botParts);
+
     const chat = new Chat({
         username: botParts[0],
         token: botParts[1],
@@ -78,6 +78,9 @@
         document.getElementById("prepareGameContainer").style.display = "none";
         document.getElementById("playGameContainer").style.display = "block";
 
+        let link = buildLink();
+        document.getElementById("linkInput").value = link;
+
         let optionBoard = document.getElementById("optionBoard");
 
         for (i = 0; i < gameData.items.length;i++) {
@@ -97,28 +100,31 @@
         const run = async () => {
 
             chat.on("*", (message) => {
-                if (!message.tags.username) {
-                    return;
-                }
                 const time = new Date(message.timestamp).toTimeString();
                 const event = message.event || message.command;
                 const channel = message.channel;
                 let msg = message.message || "";
 
-                if (msg.toLowerCase().includes("bingo")) {
+                if (!message.tags.username || !msg) {
+                    return;
+                }
+
+                let containsBingo = msg.toLowerCase().includes("bingo")
+                let confirmedBingo = false;
+                if (containsBingo) {
                     let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
                     let max = maxBingo(userIndex, gameData.free);
                     if (max === 5) {
                         msg += " CONFIRMED: BINGO";
+                        confirmedBingo = true;
                     } else if (max >= 3) {
                         msg += " POSSIBLE (" + max + ")";
-                    } else {
-                        return
                     }
                 }
                 let div = document.createElement("div");
                 div.innerHTML = `<strong>${message.tags.displayName}:</strong> ${msg}`;
                 div.style.cursor = 'pointer';
+                div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
                 div.onclick = () => {
                     checkPlayerName(message.tags.username);
                     document.getElementById("checkPlayerContainer").scrollIntoView();
@@ -160,12 +166,18 @@
         document.getElementById("checkPlayerInput").value = ''
         document.getElementById("checkPlayerContainer").innerHTML = ''
         document.getElementById("optionBoard").innerHTML = ''
+        document.getElementById("linkInput").value = ''
+
+        chat.off('*');
+        chat.removeAllListeners();
+        chat.disconnect();
+
         switchToPrepareMode();
     }
 
     function buildLink() {
         let gameData = buildGameData();
-        return window.location.origin + window.location.pathname.replace("manage.html", "") + "?g=" + LZString.compressToBase64(JSON.stringify(gameData));
+        return window.location.origin + window.location.pathname.replace("manage.html", "") + "?g=" + LZString.compressToEncodedURIComponent(JSON.stringify(gameData));
     }
 
     function shareGame() {
@@ -332,10 +344,11 @@
         document.getElementById("winnerInput").value = appState.winner;
         document.getElementById("optionInput").value = appState.options;
         document.getElementById("centerInput").checked = appState.free;
-        let link = buildLink();
-        document.getElementById("linkInput").value = link;
         appState.key = key;
         saveAppState(appState);
+
+        let link = buildLink();
+        document.getElementById("linkInput").value = link;
 
         if (appState.state === "game") {
             let gameData = buildGameData();
