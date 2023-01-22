@@ -69,6 +69,12 @@
         item.setAttribute("aria-pressed", newValue);
         saveAppState(appState);
 
+        if (newValue) {
+            chat.say(appState.channel, "\"" + item.innerHTML + "\" ✅");
+        } else {
+            chat.say(appState.channel, "\"" + item.innerHTML + "\" ❌");
+        }
+
         if (appState.checkPlayer) {
             checkPlayer();
         }
@@ -130,6 +136,7 @@
                     document.getElementById("checkPlayerContainer").scrollIntoView();
                 }
                 app.appendChild(div);
+                app.scrollTop = app.scrollHeight;
             });
 
             await chat.connect();

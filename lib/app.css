@@ -210,6 +210,8 @@ svg {
 #twitchChat {
   margin-right: 100px;
   width: 400px;
+  max-height:600px;
+  overflow: scroll;
 }
 
 .no-bingo-msg {
