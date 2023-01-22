@@ -209,9 +209,10 @@ svg {
 
 #twitchChat {
   margin-right: 100px;
-  width: 400px;
-  max-height:600px;
+  min-width: 400px;
+  height: 560px;
   overflow: scroll;
+  background-color: white;
 }
 
 .no-bingo-msg {
@@ -225,4 +226,19 @@ svg {
 .confirmed-bingo-msg {
   background-color: #096700;
   color: #fff
+}
+
+#checkPlayerContainer, #gameContainer, #headerContainer {
+  max-width: 750px;
+}
+
+#gameControl {
+  margin-left: 50px
+}
+.half {
+  width: 50%;
+}
+
+#optionBoard {
+  margin-top: 0;
 }

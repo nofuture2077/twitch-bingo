@@ -318,29 +318,36 @@
         <div id="gameContainer"></div>
     </div>
     <div id="playGameContainer">
-        <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
-        <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
-        <br><br>
+        <div id="gameControl">
+            <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
+            <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
+            <br><br>
+            <label for="linkInput">Link to the Game</label><br/>
+            <input name="linkInput" id="linkInput" size="80"/>
+            <br><br>
+        </div>
         <div class="flex justify-between">
-            <div><ul id="optionBoard"></ul></div>
-            <div><div id="twitchChat"></div></div>
-        </div>
-        <br><br>
-        <label for="linkInput">Link to the Game</label><br/>
-        <input name="linkInput" id="linkInput" size="80"/>
-        <br><br>
-        <div class="flex justify-between items-end">
-            <div>
-                <label for="checkPlayerInput">Check for Player Bingo</label><br/>
-                <input name="checkPlayerInput" id="checkPlayerInput"/>
-                <button onClick="checkPlayer()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Check</button>
-                <button onClick="announceWinner()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Winner</button>
+            <div class="half">
+                <ul id="optionBoard"></ul>
             </div>
-            <div>
-                <h1 id="bingo"></h1>
+            <div class="half">
+                <div id="twitchChat"></div>
+                <br><br>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <label for="checkPlayerInput">Check for Player Bingo</label><br/>
+                        <input name="checkPlayerInput" id="checkPlayerInput"/>
+                        <button onClick="checkPlayer()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Check</button>
+                        <button onClick="announceWinner()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Winner</button>
+                    </div>
+                    <div>
+                        <h1 id="bingo"></h1>
+                    </div>
+                </div>
+                <div id="checkPlayerContainer"></div>
             </div>
         </div>
-        <div id="checkPlayerContainer"></div>
+
     </div>
     <script>
         key = appState.key || self.crypto.randomUUID();
