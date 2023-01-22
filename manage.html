@@ -8,18 +8,29 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
+    let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
     let appStateData = localStorage.getItem("appstate");
     let appState = appStateData ? JSON.parse(appStateData) :  {
         "channel": "",
         "title": "",
-        "bot": "",
+        "bot": "#",
         "key": "",
         "options": "",
         "checked": {},
         "state": "manage"
     };
 
-    var pad_array = function(arr, len, fill) {
+    const { Chat } = window.TwitchJs;
+
+    let botParts = appState.bot.split("#");
+    console.log(botParts);
+    const chat = new Chat({
+        username: botParts[0],
+        token: botParts[1],
+        clientId: clientId
+    });
+
+    function pad_array (arr, len, fill) {
         return arr.concat(Array(len).fill(fill)).slice(0,len);
     }
 
@@ -27,6 +38,7 @@
         var channel = document.getElementById("channelInput").value; 
         var key = document.getElementById("keyInput").value; 
         var title = document.getElementById("titleInput").value; 
+        var winner = document.getElementById("winnerInput").value; 
         var free = document.getElementById("centerInput").checked; 
         var options = document.getElementById("optionInput").value;            
         var lines = pad_array(options.replace(/\r\n/g,"\n").split("\n").map(s => s.trim()).filter(s => s), 25, "Empty");
@@ -34,6 +46,7 @@
         return {
             channel: channel,
             title: title,
+            winner: winner,
             key: key,
             free: free,
             items: lines
@@ -76,6 +89,48 @@
             li.setAttribute("aria-pressed", appState.checked[i])
             optionBoard.appendChild(li);
         }
+
+        const channel = appState.channel;
+
+        const app = document.getElementById("twitchChat");
+        app.innerHTML = '';
+        const run = async () => {
+
+            chat.on("*", (message) => {
+                if (!message.tags.username) {
+                    return;
+                }
+                const time = new Date(message.timestamp).toTimeString();
+                const event = message.event || message.command;
+                const channel = message.channel;
+                let msg = message.message || "";
+
+                if (msg.toLowerCase().includes("bingo")) {
+                    let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
+                    let max = maxBingo(userIndex, gameData.free);
+                    if (max === 5) {
+                        msg += " CONFIRMED: BINGO";
+                    } else if (max >= 3) {
+                        msg += " POSSIBLE (" + max + ")";
+                    } else {
+                        return
+                    }
+                }
+                let div = document.createElement("div");
+                div.innerHTML = `<strong>${message.tags.displayName}:</strong> ${msg}`;
+                div.style.cursor = 'pointer';
+                div.onclick = () => {
+                    checkPlayerName(message.tags.username);
+                    document.getElementById("checkPlayerContainer").scrollIntoView();
+                }
+                app.appendChild(div);
+            });
+
+            await chat.connect();
+            await chat.join(channel);
+        };
+
+        run();
     }
 
     function switchToPrepareMode() {
@@ -94,6 +149,7 @@
     }
 
     function stopGame() {
+        if (!confirm("Are you shure to stop the Game?")) return
         appState.state = "manage";
         appState.key = self.crypto.randomUUID();
         appState.checked = {};
@@ -114,8 +170,14 @@
 
     function shareGame() {
         let link = buildLink();
+        chat.say(appState.channel, appState.title.replace("#link", link))
+    }
 
-        console.log(link);
+    function announceWinner() {
+        let username = document.getElementById("checkPlayerInput").value
+        if (!username) return
+        if (!confirm("Are you shure to announce the Winner: " + username + "?")) return
+        chat.say(appState.channel, appState.winner.replace("#user", username))
     }
 
     function saveAppState(appState) {
@@ -134,30 +196,52 @@
         saveAppState(appState);
     }
 
-    function isBingo(userIndex, free) {
-        let result = userIndex.map((x, i) => appState.checked[x]);
+    function maxBingo(userIndex, free) {
+        let idx = userIndex.map((x, i) => appState.checked[x]);
 
         if (free) {
-            result[12] = true;
+            idx[12] = true;
         }
 
-        return (result[0] && result[1] && result[2] && result[3] && result[4]) ||
-        (result[5] && result[6] && result[7] && result[8] && result[9]) ||
-        (result[10] && result[11] && result[12] && result[13] && result[14]) ||
-        (result[15] && result[16] && result[17] && result[18] && result[19]) ||
-        (result[20] && result[12] && result[22] && result[23] && result[24]) ||
-        (result[0] && result[5] && result[10] && result[15] && result[20]) ||
-        (result[1] && result[6] && result[11] && result[16] && result[21]) ||
-        (result[2] && result[7] && result[12] && result[17] && result[22]) ||
-        (result[3] && result[8] && result[13] && result[18] && result[23]) ||
-        (result[4] && result[9] && result[14] && result[19] && result[24]) ||
-        (result[0] && result[6] && result[12] && result[18] && result[24]) ||
-        (result[4] && result[8] && result[12] && result[16] && result[20]);
+        let result = idx.map(x => x ? 1 : 0)
+
+        return Math.max( (result[0] + result[1] + result[2] + result[3] + result[4]),
+        (result[5] + result[6] + result[7] + result[8] + result[9]),
+        (result[10] + result[11] + result[12] + result[13] + result[14]),
+        (result[15] + result[16] + result[17] + result[18] + result[19]),
+        (result[20] + result[21] + result[22] + result[23] + result[24]),
+        (result[0] + result[5] + result[10] + result[15] + result[20]),
+        (result[1] + result[6] + result[11] + result[16] + result[21]),
+        (result[2] + result[7] + result[12] + result[17] + result[22]),
+        (result[3] + result[8] + result[13] + result[18] + result[23]),
+        (result[4] + result[9] + result[14] + result[19] + result[24]),
+        (result[0] + result[6] + result[12] + result[18] + result[24]),
+        (result[4] + result[8] + result[12] + result[16] + result[20]));
+    }
+
+    function isBingo(userIndex, free) {
+        let max = maxBingo(userIndex, free);
+        return max === 5
+    }
+
+    function checkPlayerWithName(playerName) {
+        let gameData = buildGameData();
+        
+        appState.checkPlayer = true;
+        let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
+
+        return isBingo(userIndex, gameData.free);
     }
 
     function checkPlayer() {
         let playerName = document.getElementById("checkPlayerInput").value
+        checkPlayerName(playerName)
+    }
 
+    function checkPlayerName(playerName) {
+        document.getElementById("checkPlayerInput").value = playerName;
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
@@ -173,7 +257,7 @@
         }
 
         createTable("checkPlayerContainer", gameData)
-    }
+    } 
 
 </script>
 </head>
@@ -185,19 +269,22 @@
         <div class="flex justify-between">
             <div>
                 <label for="channelInput">Channel:</label><br/>
-                <input name="channelInput" id="channelInput" onblur="save('channelInput', 'channel')"/>
+                <input name="channelInput" id="channelInput" onblur="save('channelInput', 'channel')" size="50"/>
                 <br><br>
-                <label for="titleInput">Game Titel:</label><br/>
-                <input name="titleInput" id="titleInput" value="A nice Game of Bingo" onblur="save('titleInput', 'title')"/>
+                <label for="titleInput">Share Text</label><br/>
+                <input name="titleInput" id="titleInput" value="Join a nice game of scam bingo! " onblur="save('titleInput', 'title')" size="50"/>
+                <br><br>
+                <label for="winnerInput">Winner Text</label><br/>
+                <input name="winnerInput" id="winnerInput" value="We have a winner!" onblur="save('winnerInput', 'winner')" size="50"/>
                 <br><br>
                 <label for="keyInput">Game Key:</label><br/>
-                <input name="keyInput" id="keyInput" disabled="true"/>
+                <input name="keyInput" id="keyInput" disabled="true" size="50"/>
                 <br><br>
                 <label for="botInput">Bot Auth:</label><br/>
-                <input name="botInput" id="botInput" onblur="save('botInput', 'bot')"/>
+                <input name="botInput" id="botInput" onblur="save('botInput', 'bot')" size="50"/>
                 <br><br>
                 <label for="centerInput">Free Center</label>
-                <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')">  
+                <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')" size="50" />  
                 <br/><br/>
             </div>
             <div>
@@ -215,7 +302,10 @@
         <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
         <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
         <br><br>
-        <ul id="optionBoard"></ul>
+        <div class="flex justify-between">
+            <div><ul id="optionBoard"></ul></div>
+            <div><div id="twitchChat"></div></div>
+        </div>
         <br><br>
         <label for="linkInput">Link to the Game</label><br/>
         <input name="linkInput" id="linkInput" size="80"/>
@@ -225,6 +315,7 @@
                 <label for="checkPlayerInput">Check for Player Bingo</label><br/>
                 <input name="checkPlayerInput" id="checkPlayerInput"/>
                 <button onClick="checkPlayer()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Check</button>
+                <button onClick="announceWinner()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Winner</button>
             </div>
             <div>
                 <h1 id="bingo"></h1>
@@ -238,6 +329,7 @@
         document.getElementById("botInput").value = appState.bot;
         document.getElementById("channelInput").value = appState.channel;
         document.getElementById("titleInput").value = appState.title;
+        document.getElementById("winnerInput").value = appState.winner;
         document.getElementById("optionInput").value = appState.options;
         document.getElementById("centerInput").checked = appState.free;
         let link = buildLink();
