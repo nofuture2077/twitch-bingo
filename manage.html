@@ -24,6 +24,7 @@
         "title": "",
         "bot": "#",
         "key": "",
+        "shortLink": "",
         "options": "",
         "checked": {},
         "state": "manage"
@@ -186,6 +187,7 @@
         appState.key = self.crypto.randomUUID();
         appState.checked = {};
         appState.checkPlayer = false;
+        appState.shortLink = "";
         document.getElementById("keyInput").value = appState.key;
         saveAppState(appState);
 
@@ -193,6 +195,7 @@
         document.getElementById("checkPlayerContainer").innerHTML = ''
         document.getElementById("optionBoard").innerHTML = ''
         document.getElementById("linkInput").value = ''
+        document.getElementById("shortLinkInput").value = ''
 
         chat.off('*');
         chat.removeAllListeners();
@@ -208,7 +211,8 @@
 
     function shareGame() {
         let link = buildLink();
-        let msg = appState.title.replace("#link", link);
+        let shortLink = document.getElementById("shortLinkInput").value;
+        let msg = appState.title.replace("#link", shortLink);
         chat.say(appState.channel, msg)
         addMessage(botParts[0], msg);
     }
@@ -346,6 +350,9 @@
             <label for="channelInput2">Channel</label><br/>
             <input name="channelInput2" id="channelInput2" readonly value="foo"/>
             <br><br>
+            <label for="shortLinkInput">Short Link</label><br/>
+            <input name="shortLinkInput" id="shortLinkInput" onblur="save('shortLinkInput', 'shortLink')"/>
+            <br><br>
             <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
             <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
             <br><br>
@@ -388,6 +395,7 @@
         let link = buildLink();
         document.getElementById("linkInput").value = link;
         document.getElementById("channelInput2").value = appState.channel;
+        document.getElementById("shortLinkInput").value = appState.shortLink;
 
         if (appState.state === "game") {
             let gameData = buildGameData();
