@@ -69,14 +69,31 @@
         item.setAttribute("aria-pressed", newValue);
         saveAppState(appState);
 
-        if (newValue) {
-            chat.say(appState.channel, "\"" + item.innerHTML + "\" ✅");
-        } else {
-            chat.say(appState.channel, "\"" + item.innerHTML + "\" ❌");
-        }
+        let msg = newValue ? ("\"" + item.innerHTML + "\" ✅") : ("\"" + item.innerHTML + "\" ❌")
+
+        chat.say(appState.channel, msg);
+        addMessage(botParts[0], msg);
 
         if (appState.checkPlayer) {
             checkPlayer();
+        }
+    }
+
+    function addMessage(user, msg, confirmedBingo, containsBingo) {
+        const app = document.getElementById("twitchChat");
+
+        let at_bottom = (app.scrollHeight - app.scrollTop - 560) < 44;
+        let div = document.createElement("div");
+        div.innerHTML = `<strong>${user}:</strong> ${msg}`;
+        div.style.cursor = 'pointer';
+        div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
+        div.onclick = () => {
+            checkPlayerName(user);
+            document.getElementById("checkPlayerContainer").scrollIntoView();
+        }
+        app.appendChild(div);
+        if (at_bottom) {
+            app.scrollTop = app.scrollHeight;  
         }
     }
 
@@ -127,16 +144,8 @@
                         msg += " POSSIBLE (" + max + ")";
                     }
                 }
-                let div = document.createElement("div");
-                div.innerHTML = `<strong>${message.tags.displayName}:</strong> ${msg}`;
-                div.style.cursor = 'pointer';
-                div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
-                div.onclick = () => {
-                    checkPlayerName(message.tags.username);
-                    document.getElementById("checkPlayerContainer").scrollIntoView();
-                }
-                app.appendChild(div);
-                app.scrollTop = app.scrollHeight;
+                              
+                addMessage(message.tags.username, msg, confirmedBingo, containsBingo);
             });
 
             await chat.connect();
@@ -189,7 +198,9 @@
 
     function shareGame() {
         let link = buildLink();
-        chat.say(appState.channel, appState.title.replace("#link", link))
+        let msg = appState.title.replace("#link", link);
+        chat.say(appState.channel, msg)
+        addMessage(botParts[0], msg);
     }
 
     function announceWinner() {
