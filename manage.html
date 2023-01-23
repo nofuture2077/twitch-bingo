@@ -314,8 +314,8 @@
         <h1 class="ma2 f1-ns f2-m f3">ScamBingo 2000</h1>
     </header>
     <div id="prepareGameContainer">
-        <div class="flex justify-between">
-            <div>
+        <div class="gameLayout">
+            <div class="half">
                 <label for="channelInput">Channel:</label><br/>
                 <input name="channelInput" id="channelInput" onblur="save('channelInput', 'channel')" size="50"/>
                 <br><br>
@@ -335,7 +335,7 @@
                 <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')" size="50" />  
                 <br/><br/>
             </div>
-            <div>
+            <div class="half">
                 <label for="optionInput">Bingo Options. You should provide at least 25</label><br/>
                 <textarea name="optionInput" id="optionInput" rows="30" cols="50" onblur="save('optionInput', 'options')"></textarea>
             </div>
