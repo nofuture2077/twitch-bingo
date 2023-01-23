@@ -10,6 +10,7 @@
     <link rel="mask-icon" href="img/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#b72f94">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="lib/app.css" rel="stylesheet"/>
     <script src="lib/twitch.js"></script>
     <script src="lib/lz-string.js"></script>
@@ -44,6 +45,11 @@
     } else {
         let queryhash = window.location.hash.substr(1);
         let access_token = getQueryVariable(queryhash, "access_token");
+        let storageState = localStorage.getItem('state');
+        let queryState = getQueryVariable(queryhash, "state");
+        if (storageState !== queryState) {
+            throw new Error("Can't share link with your personal information. Possible csrf attack.");
+        }
         fetch('https://api.twitch.tv/helix/users', {
             headers: {
                 'Client-ID': 'uc2h7uynj3tnxh26ozo9r6uxwvlri4',
@@ -85,6 +91,7 @@
         document.getElementById("channel").innerHTML = gamedata.channel;
         document.getElementById("key").innerHTML = gamedata.key;
         document.getElementById("player").innerHTML = username;
+        document.title = gamedata.channel + " - ScamBingo2000";
     }
 </script>
 </head>

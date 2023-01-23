@@ -10,6 +10,8 @@
     <link rel="mask-icon" href="img/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#b72f94">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <link href="lib/app.css" rel="stylesheet"/>
     <script src="lib/twitch.js"></script>
     <script src="lib/lz-string.js"></script>
@@ -345,16 +347,21 @@
     <div id="playGameContainer">
         <div id="gameControl">
             <label for="linkInput">Link to the Game</label><br/>
-            <input name="linkInput" id="linkInput" readonly size="80"/>
+            <input name="linkInput" id="linkInput" readonly size="70"/>
             <br><br>
-            <label for="channelInput2">Channel</label><br/>
-            <input name="channelInput2" id="channelInput2" readonly value="foo"/>
-            <br><br>
-            <label for="shortLinkInput">Short Link</label><br/>
-            <input name="shortLinkInput" id="shortLinkInput" onblur="save('shortLinkInput', 'shortLink')"/>
-            <br><br>
-            <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
-            <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
+            <div class="flex justify-between items-end">
+                <div>
+                    <label for="channelInput2">Channel</label><br/>
+                    <input name="channelInput2" id="channelInput2" readonly value="foo"/>
+                    <br><br>
+                    <label for="shortLinkInput">Short Link</label><br/>
+                    <input name="shortLinkInput" id="shortLinkInput" onblur="save('shortLinkInput', 'shortLink')"/>
+                    <br><br>
+                    <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
+                    <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
+                </div>
+                <div></div>
+            </div>
             <br><br>
         </div>
         <div class="flex justify-between">
