@@ -187,7 +187,7 @@ svg {
 }
 
 .check-option {
-  width: 500px;
+  width: 100%;
   padding: 2px;
   margin: 2px;
   overflow: auto;
@@ -208,7 +208,6 @@ svg {
 }
 
 #twitchChat {
-  margin-right: 100px;
   min-width: 400px;
   height: 560px;
   overflow: scroll;
@@ -235,10 +234,19 @@ svg {
 #gameControl {
   margin-left: 50px
 }
-.half {
-  width: 50%;
-}
 
 #optionBoard {
   margin-top: 0;
+  padding: 0px;
+}
+
+.gameLayout {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.half {
+  flex-grow: 1;
+  padding: 0 20px 0 20px;
+  min-width: 500px;
 }
