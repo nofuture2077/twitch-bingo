@@ -223,7 +223,9 @@
         let username = document.getElementById("checkPlayerInput").value
         if (!username) return
         if (!confirm("Are you shure to announce the Winner: " + username + "?")) return
-        chat.say(appState.channel, appState.winner.replace("#user", username))
+        let msg = appState.winner.replace("#user", username);
+        chat.say(appState.channel, msg);
+        addMessage(botParts[0], msg);
     }
 
     function saveAppState(appState) {
