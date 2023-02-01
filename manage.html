@@ -24,6 +24,7 @@
     let appState = appStateData ? JSON.parse(appStateData) :  {
         "channel": "",
         "title": "",
+        "stop": "",
         "bot": "#",
         "key": "",
         "shortLink": "",
@@ -51,6 +52,7 @@
         var key = document.getElementById("keyInput").value; 
         var title = document.getElementById("titleInput").value; 
         var winner = document.getElementById("winnerInput").value; 
+        var stop = document.getElementById("stopInput").value; 
         var free = document.getElementById("centerInput").checked; 
         var options = document.getElementById("optionInput").value;            
         var lines = pad_array(options.replace(/\r\n/g,"\n").split("\n").map(s => s.trim()).filter(s => s), 25, "Empty");
@@ -59,6 +61,7 @@
             channel: channel,
             title: title,
             winner: winner,
+            stop: stop,
             key: key,
             free: free,
             items: lines
@@ -199,6 +202,10 @@
         document.getElementById("linkInput").value = ''
         document.getElementById("shortLinkInput").value = ''
 
+        let msg = document.getElementById("stopInput").value;
+        chat.say(appState.channel, msg)
+        addMessage(botParts[0], msg);
+
         chat.off('*');
         chat.removeAllListeners();
         chat.disconnect();
@@ -322,6 +329,9 @@
                 <label for="titleInput">Share Text</label><br/>
                 <input name="titleInput" id="titleInput" value="Join a nice game of scam bingo! " onblur="save('titleInput', 'title')" size="50"/>
                 <br><br>
+                <label for="stopInput">Stop Text</label><br/>
+                <input name="stopInput" id="stopInput" value="Round has ended" onblur="save('stopInput', 'stop')" size="50"/>
+                <br><br>
                 <label for="winnerInput">Winner Text</label><br/>
                 <input name="winnerInput" id="winnerInput" value="We have a winner!" onblur="save('winnerInput', 'winner')" size="50"/>
                 <br><br>
@@ -396,6 +406,7 @@
         document.getElementById("channelInput").value = appState.channel;
         document.getElementById("titleInput").value = appState.title;
         document.getElementById("winnerInput").value = appState.winner;
+        document.getElementById("stopInput").value = appState.stop;
         document.getElementById("optionInput").value = appState.options;
         document.getElementById("centerInput").checked = appState.free;
         appState.key = key;
