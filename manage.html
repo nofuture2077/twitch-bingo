@@ -413,6 +413,9 @@
         } else {
             switchToPrepareMode();
         }
+
+        let dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.querySelector("body").className = dark ? "dark" : "";
     </script>
 </body>
 </html>

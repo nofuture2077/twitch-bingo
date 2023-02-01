@@ -5,6 +5,11 @@ body {
   padding-bottom: 10rem;
 }
 
+body.dark {
+  background-color: #282828;
+  color: #c6c6c6;
+}
+
 .maxw-95 {
   max-width: 95vmin;
 }
@@ -26,6 +31,10 @@ header {
   border-bottom: 5px solid black;
 }
 
+.dark header {
+  border-bottom: 5px solid #c6c6c6;
+}
+
 header, main, aside {
  margin: 2vmin;
 }
@@ -42,11 +51,11 @@ header, main, aside {
   border-collapse: collapse;
   width: 100%;
   padding: 2rem;
-  outline: 4px solid #dddbda;
+  outline: 4px solid #c6c6c6;
 }
 
 *[role='gridcell'] {
-  outline: 2px solid #dddbda;
+  outline: 2px solid #c6c6c6;
   position: relative;
 }
 
@@ -77,6 +86,11 @@ header, main, aside {
 
   cursor: pointer;
   font-size: 24px;
+}
+
+.dark .cell-toggle {
+  background: #282828;
+  color: #c6c6c6;
 }
 
 .cell-toggle[aria-pressed='true'] {
@@ -201,10 +215,14 @@ svg {
   font-size: 22px;
 }
 
+.dark .check-option {
+  background: #171717;
+}
+
 .check-option[aria-pressed='true'] {
   background: #16325c;
-  color: white;
   font-style: italic;
+  color: #c6c6c6;
 }
 
 #twitchChat {
@@ -212,6 +230,10 @@ svg {
   height: 560px;
   overflow: scroll;
   background-color: white;
+}
+
+.dark #twitchChat {
+  background-color: #171717;
 }
 
 .no-bingo-msg {

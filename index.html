@@ -103,5 +103,9 @@
         <span>Channel: <strong id="channel"></strong></span>
         <span>Player: <strong id="player"></strong></span>
     </p>
+    <script>
+        let dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.querySelector("body").className = dark ? "dark" : "";
+    </script>
 </body>
 </html>
