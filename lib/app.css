@@ -227,6 +227,7 @@ svg {
 
 #twitchChat {
   min-width: 400px;
+  max-width: 800px;
   height: 560px;
   overflow: scroll;
   background-color: white;
