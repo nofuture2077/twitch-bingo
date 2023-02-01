@@ -43,7 +43,7 @@
     });
 
     function pad_array (arr, len, fill) {
-        return arr.concat(Array(len).fill(fill)).slice(0,len);
+        return arr.concat(Array(len).fill(fill)).slice(0, Math.max(len, arr.length));
     }
 
     function buildGameData() {
@@ -148,7 +148,7 @@
                 let containsBingo = msg.toLowerCase().includes("bingo")
                 let confirmedBingo = false;
                 if (containsBingo) {
-                    let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
+                    let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
                     let max = maxBingo(userIndex, gameData.free);
                     if (max === 5) {
                         msg += " CONFIRMED: BINGO";
@@ -276,7 +276,7 @@
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + playerName);
         gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
@@ -293,7 +293,7 @@
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + playerName);
         gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
