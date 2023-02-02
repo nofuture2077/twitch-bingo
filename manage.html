@@ -295,6 +295,17 @@
         checkPlayerName(playerName)
     }
 
+    function shareStatus() {
+        let checked = Array.from(document.querySelectorAll(".check-option[aria-pressed='true']")).map(x => x.innerHTML);
+        let checkedChunks = chunks(checked, 10);
+        for (let i in checkedChunks) {
+            let msg = checkedChunks[i].join(" ✅ - ") + " ✅";
+            chat.say(appState.channel, msg)
+            addMessage(botParts[0], msg);
+        }
+        
+    }
+
     function checkPlayerName(playerName) {
         document.getElementById("checkPlayerInput").value = playerName;
         let gameData = buildGameData();
@@ -370,6 +381,7 @@
                     <input name="shortLinkInput" id="shortLinkInput" onblur="save('shortLinkInput', 'shortLink')"/>
                     <br><br>
                     <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
+                    <button onClick="shareStatus()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Status</button>
                     <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
                 </div>
                 <div></div>
