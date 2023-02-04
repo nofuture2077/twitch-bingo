@@ -28,11 +28,6 @@ header {
   min-height: 4rem;
   font-weight: 800;
   max-width: 95vmin;
-  border-bottom: 5px solid black;
-}
-
-.dark header {
-  border-bottom: 5px solid #c6c6c6;
 }
 
 header, main, aside {

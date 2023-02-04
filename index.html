@@ -32,6 +32,9 @@
     if (!document.location.hash.includes('access_token')) {
         var query = window.location.search.substring(1);
         let queryData = getQueryVariable(query, 'g');
+        if (!queryData) {
+            throw new Error("No game data available.");
+        }
         localStorage.setItem('g', queryData);
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
@@ -50,6 +53,7 @@
         if (storageState !== queryState) {
             throw new Error("Can't share link with your personal information. Possible csrf attack.");
         }
+
         fetch('https://api.twitch.tv/helix/users', {
             headers: {
                 'Client-ID': 'uc2h7uynj3tnxh26ozo9r6uxwvlri4',
@@ -66,6 +70,10 @@
     var queryData = localStorage.getItem('g') || 'N4XyA===';
     var gamedata = JSON.parse(LZString.decompressFromEncodedURIComponent(queryData)) || {};
     let GAMEKEY = gamedata.channel + "#" + gamedata.key;
+
+    if (!gamedata.items) {
+        throw new Error("No game data available.");
+    }
 
     function toogleCellHandle(caller, gameState, index) {
         let newState = !gameState.checked[index];
@@ -95,7 +103,7 @@
 </script>
 </head>
 <body>
-    <header id="headerContainer" class="flex justify-between items-end bb-5 pv-1">
+    <header id="headerContainer" class="flex justify-between items-end pv-1">
         <h1 class="ma2 f1-ns f2-m f3">ScamBingo 2000</h1>
     </header>
     <div id="gameContainer"></div>
