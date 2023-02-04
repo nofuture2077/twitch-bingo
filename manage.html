@@ -147,7 +147,7 @@
             chat.on("*", (message) => {
                 const time = new Date(message.timestamp).toTimeString();
                 const event = message.event || message.command;
-                const channel = message.channel;
+                const channel = message.channel.substr(1);
                 let msg = message.message || "";
 
                 if (!message.tags.username || !msg) {
@@ -160,10 +160,10 @@
                     let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
                     let max = maxBingo(userIndex, gameData.free);
                     if (max === 5) {
-                        msg += " CONFIRMED: BINGO";
+                        msg += " BINGO";
                         confirmedBingo = true;
                     } else if (max >= 3) {
-                        msg += " POSSIBLE (" + max + ")";
+                        msg += " (" + max + " / 5)";
                     }
                 }
                               
