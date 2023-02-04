@@ -25,7 +25,7 @@
         "channel": "",
         "title": "",
         "stop": "",
-        "bot": "#",
+        "bot": "",
         "key": "",
         "shortLink": "",
         "options": "",
@@ -48,7 +48,7 @@
     }
 
     function buildGameData() {
-        var channel = document.getElementById("channelInput").value; 
+        var channel = document.getElementById("channelInput").value.trim().toLowerCase(); 
         var key = document.getElementById("keyInput").value; 
         var title = document.getElementById("titleInput").value; 
         var winner = document.getElementById("winnerInput").value; 
@@ -76,6 +76,11 @@
         createTable("gameContainer", gameData)
     }
 
+    function postMessageToChannel(channel, message) {
+        let channels = channel.split(",").map(x => x.trim().toLowerCase());
+        channels.forEach(c => chat.say(c, message));
+    }
+
     function checkOption(item, gameData) {
         let index = item.getAttribute("index");
         let newValue = !gameData.checked[index]
@@ -86,20 +91,21 @@
 
         let msg = newValue ? ("\"" + item.innerHTML + "\" ✅") : ("\"" + item.innerHTML + "\" ❌")
 
-        chat.say(appState.channel, msg);
-        addMessage(botParts[0], msg);
+        postMessageToChannel(appState.channel, msg);
+        addMessage(botParts[0], undefined, msg);
 
         if (appState.checkPlayer) {
             checkPlayer();
         }
     }
 
-    function addMessage(user, msg, confirmedBingo, containsBingo) {
+    function addMessage(user, channel, msg, confirmedBingo, containsBingo) {
         const app = document.getElementById("twitchChat");
 
         let at_bottom = (app.scrollHeight - app.scrollTop - 560) < 44;
         let div = document.createElement("div");
-        div.innerHTML = `<strong>${user}:</strong> ${msg}`;
+        let channelInfo = channel && (channel !== appState.channel) ? (" (" + channel + ")") : "";
+        div.innerHTML = `<strong>${user}${channelInfo}:</strong> ${msg}`;
         div.style.cursor = 'pointer';
         div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
         div.onclick = () => {
@@ -161,11 +167,12 @@
                     }
                 }
                               
-                addMessage(message.tags.username, msg, confirmedBingo, containsBingo);
+                addMessage(message.tags.username, channel, msg, confirmedBingo, containsBingo);
             });
 
             await chat.connect();
-            await chat.join(channel);
+            let channels = channel.split(",").map(x => x.trim().toLowerCase());
+            channels.forEach(c => chat.join(c));
         };
 
         run();
@@ -203,8 +210,10 @@
         document.getElementById("shortLinkInput").value = ''
 
         let msg = document.getElementById("stopInput").value;
-        chat.say(appState.channel, msg)
-        addMessage(botParts[0], msg);
+        if (msg) {
+            postMessageToChannel(appState.channel, msg)
+            addMessage(botParts[0], undefined, msg);
+        }
 
         chat.off('*');
         chat.removeAllListeners();
@@ -222,8 +231,8 @@
         let link = buildLink();
         let shortLink = document.getElementById("shortLinkInput").value;
         let msg = appState.title.replace("#link", shortLink);
-        chat.say(appState.channel, msg)
-        addMessage(botParts[0], msg);
+        postMessageToChannel(appState.channel, msg)
+        addMessage(botParts[0], undefined, msg);
     }
 
     function announceWinner() {
@@ -231,8 +240,8 @@
         if (!username) return
         if (!confirm("Are you shure to announce the Winner: " + username + "?")) return
         let msg = appState.winner.replace("#user", username);
-        chat.say(appState.channel, msg);
-        addMessage(botParts[0], msg);
+        postMessageToChannel(appState.channel, msg);
+        addMessage(botParts[0], undefined, msg);
     }
 
     function saveAppState(appState) {
@@ -300,8 +309,8 @@
         let checkedChunks = chunks(checked, 10);
         for (let i in checkedChunks) {
             let msg = checkedChunks[i].join(" ✅ - ") + " ✅";
-            chat.say(appState.channel, msg)
-            addMessage(botParts[0], msg);
+            postMessageToChannel(appState.channel, msg)
+            addMessage(botParts[0], undefined, msg);
         }
         
     }
@@ -414,7 +423,7 @@
     <script>
         key = appState.key || self.crypto.randomUUID();
         document.getElementById("keyInput").value = key;
-        document.getElementById("botInput").value = appState.bot;
+        document.getElementById("botInput").value = appState.bot.trim().toLowerCase();
         document.getElementById("channelInput").value = appState.channel;
         document.getElementById("titleInput").value = appState.title;
         document.getElementById("winnerInput").value = appState.winner;
