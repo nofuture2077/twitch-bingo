@@ -147,7 +147,7 @@
             chat.on("*", (message) => {
                 const time = new Date(message.timestamp).toTimeString();
                 const event = message.event || message.command;
-                const channel = message.channel.substr(1);
+                const channel = message.channel ? message.channel.substr(1) : undefined;
                 let msg = message.message || "";
 
                 if (!message.tags.username || !msg) {
