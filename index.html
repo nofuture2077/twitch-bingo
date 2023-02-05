@@ -69,7 +69,7 @@
     
     var queryData = localStorage.getItem('g') || 'N4XyA===';
     var gamedata = JSON.parse(LZString.decompressFromEncodedURIComponent(queryData)) || {};
-    let GAMEKEY = gamedata.channel + "#" + gamedata.key;
+    let GAMEKEY = gamedata.key;
 
     if (!gamedata.items) {
         throw new Error("No game data available.");

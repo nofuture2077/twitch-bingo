@@ -71,14 +71,14 @@
     function showPreview() {
         let gameData = buildGameData();
         gameData.checked = {};
-        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + "testuser123");
+        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + "testuser123");
 
         createTable("gameContainer", gameData)
     }
 
     function postMessageToChannel(channel, message) {
         let channels = channel.split(",").map(x => x.trim().toLowerCase());
-        channels.forEach(c => chat.say(c, message));
+        chat.broadcast(message);
     }
 
     function checkOption(item, gameData) {
@@ -118,13 +118,36 @@
         }
     }
 
+    function renderChannels(c) {
+        let channels = c.split(",").map(x => x.trim()).filter(x => x);
+        
+        let channelsContainer = document.getElementById("channelsContainer");
+        channelsContainer.innerHTML = '';
+        
+        if (!channels.length) return;
+        channels.forEach(channel => {
+            let div = document.createElement('div');
+            div.innerHTML = channel + " - ";
+            let a = document.createElement('a');
+            a.onclick = () => {
+                if (!confirm("Are you shure to leave channel " + channel + "?")) return
+                leaveChannel(channel);
+                renderChannels(appState.channel);
+            }
+            a.href= "#"
+            a.innerHTML = "remove";
+            div.appendChild(a);
+            channelsContainer.appendChild(div);
+        })
+    }
+
     function switchToGameMode(gameData) {
         document.getElementById("prepareGameContainer").style.display = "none";
         document.getElementById("playGameContainer").style.display = "block";
 
         let link = buildLink();
         document.getElementById("linkInput").value = link;
-        document.getElementById("channelInput2").value = appState.channel;
+        renderChannels(appState.channel);
 
         let optionBoard = document.getElementById("optionBoard");
 
@@ -157,7 +180,7 @@
                 let containsBingo = msg.toLowerCase().includes("bingo")
                 let confirmedBingo = false;
                 if (containsBingo) {
-                    let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + message.tags.username);
+                    let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + message.tags.username);
                     let max = maxBingo(userIndex, gameData.free);
                     if (max === 5) {
                         msg += " BINGO";
@@ -191,6 +214,33 @@
         saveAppState(appState);
 
         switchToGameMode(gameData);
+    }
+
+    function leaveChannel(c) {
+        let channel = c.toLowerCase().trim();
+        let channels = appState.channel.split(",").map(x => x.trim());
+        if (channels.includes(channel)) {
+            appState.channel = channels.filter(c => c !== channel).join(", ");
+            saveAppState(appState);
+            chat.part(channel);
+        }
+    }
+
+    function joinChannel(c) {
+        let channel = c.toLowerCase().trim();
+        let channels = appState.channel.split(",").map(x => x.trim());
+        if (!channels.includes(channel)) {
+            appState.channel = channels.concat(channel).join(", ");
+            saveAppState(appState);
+            chat.join(channel);
+        }
+    }
+
+    function addChannel() {
+        let channelName = prompt("Enter Channel Id");
+        console.log(channelName);
+        joinChannel(channelName);
+        renderChannels(appState.channel)
     }
 
     function stopGame() {
@@ -292,8 +342,8 @@
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + playerName);
-        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + playerName);
+        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + playerName);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
         return isBingo(userIndex, gameData.free);
@@ -320,8 +370,8 @@
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.items.length, gameData.channel + "#" + gameData.key + "#" + playerName);
-        gameData.userItems = randomSample(gameData.items, 25, gameData.channel + "#" + gameData.key + "#" + playerName);
+        let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + playerName);
+        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + playerName);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
         let bingo = isBingo(userIndex, gameData.free);
@@ -383,12 +433,14 @@
             <br><br>
             <div class="flex justify-between items-end">
                 <div>
-                    <label for="channelInput2">Channel</label><br/>
-                    <input name="channelInput2" id="channelInput2" readonly value="foo"/>
-                    <br><br>
                     <label for="shortLinkInput">Short Link</label><br/>
                     <input name="shortLinkInput" id="shortLinkInput" onblur="save('shortLinkInput', 'shortLink')"/>
                     <br><br>
+                    <label for="channels2Input">Channel</label><br/>
+                    <div id="channelsContainer">
+
+                    </div><br><br>
+                    <button onClick="addChannel()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Add Channel</button>
                     <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
                     <button onClick="shareStatus()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Status</button>
                     <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
@@ -435,8 +487,9 @@
 
         let link = buildLink();
         document.getElementById("linkInput").value = link;
-        document.getElementById("channelInput2").value = appState.channel;
         document.getElementById("shortLinkInput").value = appState.shortLink;
+
+        renderChannels(appState.channel)
 
         if (appState.state === "game") {
             let gameData = buildGameData();
