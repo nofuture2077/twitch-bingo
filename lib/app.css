@@ -228,6 +228,10 @@ svg {
   background-color: white;
 }
 
+#twitchChat > div {
+  padding: 1px 10px;
+}
+
 .dark #twitchChat {
   background-color: #171717;
 }
@@ -237,11 +241,14 @@ svg {
 }
 
 .bingo-msg {
-  background-color: #79ff6d;
+  background-color: #f9ff7c;
+}
+.dark .bingo-msg {
+  color: #000;
 }
 
 .confirmed-bingo-msg {
-  background-color: #096700;
+  background-color: #0e9e00;
   color: #fff
 }
 
