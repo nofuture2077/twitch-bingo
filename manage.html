@@ -110,13 +110,13 @@
         }
     }
 
-    function addMessage(user, channel, msg, confirmedBingo, containsBingo) {
+    function addMessage(user, channel, msg, confirmedBingo, containsBingo, displayname, color) {
         const app = document.getElementById("twitchChat");
 
         let at_bottom = (app.scrollHeight - app.scrollTop - 560) < 44;
         let div = document.createElement("div");
-        let channelInfo = channel && (channel !== appState.channel) ? (" (" + channel + ")") : "";
-        div.innerHTML = `<strong>${user}${channelInfo}:</strong> ${msg}`;
+        let channelInfo = channel && (channel !== appState.channel) ? ("(" + channel + ") ") : "";
+        div.innerHTML = `${channelInfo}<strong><span style="${color ? ('color: ' + color) : ''}">${displayname ? displayname : user}</span>:</strong> ${msg}`;
         div.style.cursor = 'pointer';
         div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
         div.onclick = () => {
@@ -202,7 +202,7 @@
                     }
                 }
                               
-                addMessage(message.tags.username, channel, msg, confirmedBingo, containsBingo);
+                addMessage(message.tags.username, channel, msg, confirmedBingo, containsBingo, message.tags.displayname, message.tags.color);
             });
 
             await chat.connect();
