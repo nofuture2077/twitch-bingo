@@ -19,6 +19,12 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
+    if (window.location.search.includes('as')) {
+        var query = window.location.search.substring(1);
+        let queryData = getQueryVariable(query, 'as');
+        localStorage.setItem("appstate", LZString.decompressFromEncodedURIComponent(queryData));
+    }
+
     let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
     let appStateData = localStorage.getItem("appstate");
     let appState = appStateData ? JSON.parse(appStateData) :  {
@@ -27,6 +33,8 @@
         "stop": "",
         "bot": "",
         "key": "",
+        "free": true,
+        "unique": true,
         "shortLink": "",
         "options": "",
         "checked": {},
@@ -53,7 +61,8 @@
         var title = document.getElementById("titleInput").value; 
         var winner = document.getElementById("winnerInput").value; 
         var stop = document.getElementById("stopInput").value; 
-        var free = document.getElementById("centerInput").checked; 
+        var free = document.getElementById("centerInput").checked;
+        var unique = document.getElementById("uniqueInput").checked;
         var options = document.getElementById("optionInput").value;            
         var lines = pad_array(options.replace(/\r\n/g,"\n").split("\n").map(s => s.trim()).filter(s => s), 25, "Empty");
 
@@ -63,6 +72,7 @@
             winner: winner,
             stop: stop,
             key: key,
+            unique: unique,
             free: free,
             items: lines
         };
@@ -71,7 +81,8 @@
     function showPreview() {
         let gameData = buildGameData();
         gameData.checked = {};
-        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + "testuser123");
+        let key = gameData.key + (appState.unique ? ("#testuser123") : "");
+        gameData.userItems = randomSample(gameData.items, 25, key);
 
         createTable("gameContainer", gameData)
     }
@@ -180,7 +191,8 @@
                 let containsBingo = msg.toLowerCase().includes("bingo")
                 let confirmedBingo = false;
                 if (containsBingo) {
-                    let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + message.tags.username);
+                    let key = gameData.key + (appState.unique ? ("#" + message.tags.username) : "");
+                    let userIndex = buildUserIndex(25, gameData.items.length, key);
                     let max = maxBingo(userIndex, gameData.free);
                     if (max === 5) {
                         msg += " BINGO";
@@ -341,8 +353,9 @@
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + playerName);
-        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + playerName);
+        let key = gameData.key + (appState.unique ? ("#" + playerName) : "");
+        let userIndex = buildUserIndex(25, gameData.items.length, key);
+        gameData.userItems = randomSample(gameData.items, 25, key);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
         return isBingo(userIndex, gameData.free);
@@ -364,13 +377,24 @@
         
     }
 
+    function shareManagement() {
+        let link = window.location.origin + window.location.pathname + "?as=" + LZString.compressToEncodedURIComponent(JSON.stringify(appState));
+        navigator.clipboard.writeText(link).then(() => {
+            alert("Link copied to Clipboard");
+        }, () => {
+            console.log(link);
+        });
+        
+    }
+
     function checkPlayerName(playerName) {
         document.getElementById("checkPlayerInput").value = playerName;
         let gameData = buildGameData();
         
         appState.checkPlayer = true;
-        let userIndex = buildUserIndex(25, gameData.items.length, gameData.key + "#" + playerName);
-        gameData.userItems = randomSample(gameData.items, 25, gameData.key + "#" + playerName);
+        let key = gameData.key + (appState.unique ? ("#" + playerName) : "");
+        let userIndex = buildUserIndex(25, gameData.items.length, key);
+        gameData.userItems = randomSample(gameData.items, 25, key);
         gameData.checked = userIndex.map((x, i) => appState.checked[x] || (i === 12 && gameData.free));
 
         let bingo = isBingo(userIndex, gameData.free);
@@ -410,8 +434,11 @@
                 <label for="botInput">Bot Auth:</label><br/>
                 <input name="botInput" id="botInput" onblur="save('botInput', 'bot')" size="50"/>
                 <br><br>
+                <label for="uniqueInput">Unique Board</label>
+                <input type="checkbox" id="uniqueInput" name="uniqueInput" onChange="saveChecked('uniqueInput', 'unique')" value="true"/>  
+                <br/><br/>
                 <label for="centerInput">Free Center</label>
-                <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')" size="50" />  
+                <input type="checkbox" id="centerInput" name="centerInput" onChange="saveChecked('centerInput', 'free')" />  
                 <br/><br/>
             </div>
             <div class="half">
@@ -440,6 +467,7 @@
 
                     </div><br><br>
                     <button onClick="addChannel()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Add Channel</button>
+                    <button onClick="shareManagement()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">New GM</button>
                     <button onClick="stopGame()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Stop</button>
                     <button onClick="shareStatus()" class="tc fw8 bg-white black pa3 ba bw1 b--black mb2">Status</button>
                     <button onClick="shareGame()" class="tc fw8 bg-black white pa3 ba bw1 b--black mb2">Share</button>
@@ -481,6 +509,7 @@
         document.getElementById("stopInput").value = appState.stop;
         document.getElementById("optionInput").value = appState.options;
         document.getElementById("centerInput").checked = appState.free;
+        document.getElementById("uniqueInput").checked = appState.unique;
         appState.key = key;
         saveAppState(appState);
 
