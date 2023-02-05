@@ -73,11 +73,12 @@
 
     function renderGame(username) {
         let gameStateData = localStorage.getItem(GAMEKEY);
+        let key = gameData.key + (gamedata.unique ? ("#" + username) : "");
         let gameState = gameStateData ? JSON.parse(gameStateData) : {
             key: GAMEKEY,
             user: username,
             free: gamedata.free,
-            userItems: randomSample(gamedata.items, 25, GAMEKEY + "#" + username),
+            userItems: randomSample(gamedata.items, 25, key),
             checked: {}
         };
 
