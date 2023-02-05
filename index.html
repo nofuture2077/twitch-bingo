@@ -73,7 +73,7 @@
 
     function renderGame(username) {
         let gameStateData = localStorage.getItem(GAMEKEY);
-        let key = gameData.key + (gamedata.unique ? ("#" + username) : "");
+        let key = GAMEKEY + (gamedata.unique ? ("#" + username) : "");
         let gameState = gameStateData ? JSON.parse(gameStateData) : {
             key: GAMEKEY,
             user: username,
