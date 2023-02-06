@@ -236,20 +236,31 @@ svg {
   background-color: #171717;
 }
 
-.no-bingo-msg {
+#twitchChat .no-bingo-msg {
   color: #666
 }
 
-.bingo-msg {
-  background-color: #f9ff7c;
-}
-.dark .bingo-msg {
+
+#twitchChat .dark .bingo-msg {
   color: #000;
 }
 
-.confirmed-bingo-msg {
-  background-color: #0e9e00;
+#twitchChat .confirmed-bingo-msg {
+  background-color: #0a4d04;
   color: #fff
+}
+
+#twitchChat .confirmed-bingo-msg:hover {
+  background-color: #0a7700;
+}
+
+#twitchChat .bingo-msg {
+  background-color: #484b08;
+  color: #fff
+}
+
+#twitchChat .bingo-msg:hover {
+  background-color: #8d9238;
 }
 
 #checkPlayerContainer, #gameContainer, #headerContainer, #dataContainer {
@@ -274,4 +285,17 @@ svg {
   flex-grow: 1;
   padding: 0 20px 0 20px;
   min-width: 500px;
+}
+
+#twitchChat > div:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+#twitchChat > div.system {
+  background-color: #3a2238;
+}
+
+#twitchChat > div.system:hover {
+  background-color: #4a2c47;
 }

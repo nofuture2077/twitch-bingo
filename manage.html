@@ -103,14 +103,14 @@
         let msg = newValue ? ("\"" + item.innerHTML + "\" ✅") : ("\"" + item.innerHTML + "\" ❌")
 
         postMessageToChannel(appState.channel, msg);
-        addMessage(botParts[0], undefined, msg);
+        addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
 
         if (appState.checkPlayer) {
             checkPlayer();
         }
     }
 
-    function addMessage(user, channel, msg, confirmedBingo, containsBingo, displayname, color) {
+    function addMessage(user, channel, msg, confirmedBingo, containsBingo, displayname, color, system) {
         const app = document.getElementById("twitchChat");
 
         let at_bottom = (app.scrollHeight - app.scrollTop - 560) < 44;
@@ -119,6 +119,9 @@
         div.innerHTML = `${channelInfo}<strong><span style="${color ? ('color: ' + color) : ''}">${displayname ? displayname : user}</span>:</strong> ${msg}`;
         div.style.cursor = 'pointer';
         div.className = confirmedBingo ? 'confirmed-bingo-msg' : (containsBingo ? 'bingo-msg' : 'no-bingo-msg');
+        if (system) {
+            div.className += " system";
+        }
         div.onclick = () => {
             checkPlayerName(user);
             document.getElementById("checkPlayerContainer").scrollIntoView();
@@ -207,7 +210,9 @@
 
             await chat.connect();
             let channels = channel.split(",").map(x => x.trim().toLowerCase());
-            channels.forEach(c => chat.join(c));
+            channels.forEach(c => chat.join(c).then(channelState => {
+                addMessage(botParts[0], undefined, " joined channel " + c, false, false, undefined, "#FF69B4", true);
+            }));
         };
 
         run();
@@ -234,7 +239,9 @@
         if (channels.includes(channel)) {
             appState.channel = channels.filter(c => c !== channel).join(", ");
             saveAppState(appState);
-            chat.part(channel);
+            chat.part(channel).then(channelState => {
+                addMessage(botParts[0], undefined, " left channel " + c, false, false, undefined, "#FF69B4", true);
+            });
         }
     }
 
@@ -244,7 +251,9 @@
         if (!channels.includes(channel)) {
             appState.channel = channels.concat(channel).join(", ");
             saveAppState(appState);
-            chat.join(channel);
+            chat.join(channel).then(channelState => {
+                addMessage(botParts[0], undefined, " joined channel " + c, false, false, undefined, "#FF69B4", true);
+            });
         }
     }
 
@@ -273,7 +282,7 @@
         let msg = document.getElementById("stopInput").value;
         if (msg) {
             postMessageToChannel(appState.channel, msg)
-            addMessage(botParts[0], undefined, msg);
+            addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
         }
 
         chat.off('*');
@@ -293,7 +302,7 @@
         let shortLink = document.getElementById("shortLinkInput").value;
         let msg = appState.title.replace("#link", shortLink);
         postMessageToChannel(appState.channel, msg)
-        addMessage(botParts[0], undefined, msg);
+        addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
     }
 
     function announceWinner() {
@@ -302,7 +311,7 @@
         if (!confirm("Are you shure to announce the Winner: " + username + "?")) return
         let msg = appState.winner.replace("#user", username);
         postMessageToChannel(appState.channel, msg);
-        addMessage(botParts[0], undefined, msg);
+        addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
     }
 
     function saveAppState(appState) {
@@ -372,7 +381,7 @@
         for (let i in checkedChunks) {
             let msg = checkedChunks[i].join(" ✅ - ") + " ✅";
             postMessageToChannel(appState.channel, msg)
-            addMessage(botParts[0], undefined, msg);
+            addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
         }
         
     }
