@@ -18,45 +18,49 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
-    var query = window.location.search.substring(1);
-    let clientId = getQueryVariable(query, 'c');
-    let title = getQueryVariable(query, 't');
+
 
     if (!document.location.hash.includes('access_token')) {
+        var query = window.location.search.substring(1);    
+        let clientId = getQueryVariable(query, 'c');
+        let title = getQueryVariable(query, 't');
         let queryData = getQueryVariable(query, 'g');
         if (!queryData) {
             throw new Error("No game data available.");
         }
         localStorage.setItem('g', queryData);
+        localStorage.setItem('c', clientId);
+        localStorage.setItem('t', title);
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
         let claims = JSON.stringify({userinfo: {preferred_username: null}});
         let scope = encodeURIComponent('openid');
-        let redirectUrl = window.location.origin + window.location.pathname.replace("index.html", "") + "?c=" + encodeURIComponent(clientId) + "&t=" + encodeURIComponent(title);
+        let redirectUrl = window.location.origin + window.location.pathname.replace("index.html", "");
         let responseType = encodeURIComponent('token id_token');
         let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
         window.location.href = url;
-    } else {
-        let queryhash = window.location.hash.substr(1);
-        let access_token = getQueryVariable(queryhash, "access_token");
-        let storageState = localStorage.getItem('state');
-        let queryState = getQueryVariable(queryhash, "state");
-        if (storageState !== queryState) {
-            throw new Error("Can't share link with your personal information. Possible csrf attack.");
-        }
-
-        fetch('https://api.twitch.tv/helix/users', {
-            headers: {
-                'Client-ID': clientId,
-                'Authorization': 'Bearer ' + access_token
-            }
-            })
-            .then(response => response.json())
-            .then(data => {
-                let username = data.data[0].login;
-                renderGame(username)
-            });
     }
+    let queryhash = window.location.hash.substr(1);
+    let access_token = getQueryVariable(queryhash, "access_token");
+    let storageState = localStorage.getItem('state');
+    let clientId = localStorage.getItem('c');
+    let title = localStorage.getItem('t');
+    let queryState = getQueryVariable(queryhash, "state");
+    if (storageState !== queryState) {
+        throw new Error("Can't share link with your personal information. Possible csrf attack.");
+    }
+
+    fetch('https://api.twitch.tv/helix/users', {
+        headers: {
+            'Client-ID': clientId,
+            'Authorization': 'Bearer ' + access_token
+        }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let username = data.data[0].login;
+            renderGame(username)
+        });
     
     var queryData = localStorage.getItem('g') || 'N4XyA===';
     var gamedata = JSON.parse(LZString.decompressFromEncodedURIComponent(queryData)) || {};
