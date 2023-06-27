@@ -19,17 +19,19 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
+    var query = window.location.search.substring(1);
     if (window.location.search.includes('as')) {
-        var query = window.location.search.substring(1);
         let queryData = getQueryVariable(query, 'as');
         localStorage.setItem("appstate", LZString.decompressFromEncodedURIComponent(queryData));
     }
 
-    let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
+    let clientId = getQueryVariable(query, 'c');
+
     let appStateData = localStorage.getItem("appstate");
     let appState = appStateData ? JSON.parse(appStateData) :  {
         "channel": "",
         "title": "",
+        "msg": "",
         "stop": "",
         "bot": "",
         "key": "",
@@ -59,6 +61,7 @@
         var channel = document.getElementById("channelInput").value.trim().toLowerCase(); 
         var key = document.getElementById("keyInput").value; 
         var title = document.getElementById("titleInput").value; 
+        var msg = document.getElementById("msgInput").value; 
         var winner = document.getElementById("winnerInput").value; 
         var stop = document.getElementById("stopInput").value; 
         var free = document.getElementById("centerInput").checked;
@@ -69,6 +72,7 @@
         return {
             channel: channel,
             title: title,
+            msg: msg,
             winner: winner,
             stop: stop,
             key: key,
@@ -294,13 +298,13 @@
 
     function buildLink() {
         let gameData = buildGameData();
-        return window.location.origin + window.location.pathname.replace("manage.html", "") + "?g=" + LZString.compressToEncodedURIComponent(JSON.stringify(gameData));
+        return window.location.origin + window.location.pathname.replace("manage.html", "") + "?g=" + LZString.compressToEncodedURIComponent(JSON.stringify(gameData)) + "&c=" + encodeURIComponent(clientId) + "&t=" + encodeURIComponent(gameData.title);
     }
 
     function shareGame() {
         let link = buildLink();
         let shortLink = document.getElementById("shortLinkInput").value;
-        let msg = appState.title.replace("#link", shortLink);
+        let msg = appState.msg.replace("#link", shortLink);
         postMessageToChannel(appState.channel, msg)
         addMessage(botParts[0], undefined, msg, false, false, undefined, "#FF69B4", true);
     }
@@ -428,8 +432,11 @@
                 <label for="channelInput">Channel:</label><br/>
                 <input name="channelInput" id="channelInput" onblur="save('channelInput', 'channel')" size="50"/>
                 <br><br>
-                <label for="titleInput">Share Text</label><br/>
-                <input name="titleInput" id="titleInput" value="Join a nice game of scam bingo! " onblur="save('titleInput', 'title')" size="50"/>
+                <label for="titleInput">Game Title</label><br/>
+                <input name="titleInput" id="titleInput" value="ScamBingo 2000" onblur="save('titleInput', 'title')" size="50"/>
+                <br><br>
+                <label for="msgInput">Share Text</label><br/>
+                <input name="msgInput" id="msgInput" value="Join a nice game of scam bingo! " onblur="save('msgInput', 'msg')" size="50"/>
                 <br><br>
                 <label for="stopInput">Stop Text</label><br/>
                 <input name="stopInput" id="stopInput" value="Round has ended" onblur="save('stopInput', 'stop')" size="50"/>
@@ -514,6 +521,7 @@
         document.getElementById("botInput").value = appState.bot.trim().toLowerCase();
         document.getElementById("channelInput").value = appState.channel;
         document.getElementById("titleInput").value = appState.title;
+        document.getElementById("msgInput").value = appState.msg;
         document.getElementById("winnerInput").value = appState.winner;
         document.getElementById("stopInput").value = appState.stop;
         document.getElementById("optionInput").value = appState.options;

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>ScamBingo 2000</title>
+    <title></title>
     <meta charset="UTF-8">
     <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
@@ -18,8 +18,11 @@
     <script src="lib/shuffle-seed.min.js"></script>
     <script src="lib/bingoboard.js"></script>
 <script>
+    var query = window.location.search.substring(1);
+    let clientId = getQueryVariable(query, 'c');
+    let title = getQueryVariable(query, 't');
+
     if (!document.location.hash.includes('access_token')) {
-        var query = window.location.search.substring(1);
         let queryData = getQueryVariable(query, 'g');
         if (!queryData) {
             throw new Error("No game data available.");
@@ -28,9 +31,8 @@
         let state = self.crypto.randomUUID();
         localStorage.setItem('state', state);
         let claims = JSON.stringify({userinfo: {preferred_username: null}});
-        let clientId = 'uc2h7uynj3tnxh26ozo9r6uxwvlri4';
         let scope = encodeURIComponent('openid');
-        let redirectUrl = window.location.origin + window.location.pathname.replace("index.html", "");
+        let redirectUrl = window.location.origin + window.location.pathname.replace("index.html", "") + "?c=" + encodeURIComponent(clientId) + "&t=" + encodeURIComponent(title);
         let responseType = encodeURIComponent('token id_token');
         let url = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&claims=${claims}&client_id=${clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
         window.location.href = url;
@@ -45,7 +47,7 @@
 
         fetch('https://api.twitch.tv/helix/users', {
             headers: {
-                'Client-ID': 'uc2h7uynj3tnxh26ozo9r6uxwvlri4',
+                'Client-ID': clientId,
                 'Authorization': 'Bearer ' + access_token
             }
             })
@@ -88,12 +90,14 @@
 
         document.getElementById("channel").innerHTML = gamedata.channel;
         document.getElementById("player").innerHTML = username;
+        document.getElementById("title-tag").innerText = title;
+        document.title = title;
     }
 </script>
 </head>
 <body>
     <header id="headerContainer" class="flex justify-between items-end pv-1">
-        <h1 class="ma2 f1-ns f2-m f3">ScamBingo 2000</h1>
+        <h1 class="ma2 f1-ns f2-m f3" id="title-tag"></h1>
     </header>
     <div id="gameContainer"></div>
     <p id="dataContainer" class="ph1 pb3 flex justify-between items-end">
