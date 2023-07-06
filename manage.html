@@ -391,7 +391,7 @@
     }
 
     function shareManagement() {
-        let link = window.location.origin + window.location.pathname + "?as=" + LZString.compressToEncodedURIComponent(JSON.stringify(appState));
+        let link = window.location.origin + window.location.pathname + "?as=" + LZString.compressToEncodedURIComponent(JSON.stringify(appState)) + "&c=" + encodeURIComponent(clientId);
         navigator.clipboard.writeText(link).then(() => {
             alert("Link copied to Clipboard");
         }, () => {
